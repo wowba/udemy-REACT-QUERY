@@ -18,7 +18,7 @@ export function Posts() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["posts"], // 쿼리키는 항상 배열로 받는다, v4 이상에서!
     queryFn: fetchPosts, // 데이터를 받아오기 위해 실행할 함수
-    staleTime: 5000,
+    staleTime: 5000, // staleTime의 기본값은 0
   });
 
   if (isLoading) {
