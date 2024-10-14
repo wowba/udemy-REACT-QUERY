@@ -40,8 +40,13 @@ export function Posts() {
   }, [currentPage, quertClient]);
 
   // Mutation
+  // Mutation은 사용한 뒤, 리셋되어야 한다!
   const deleteMutation = useMutation({
     mutationFn: (postId) => deletePost(postId),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (postId) => updatePost(postId),
   });
 
   if (isLoading) {
@@ -59,7 +64,11 @@ export function Posts() {
           <li
             key={post.id}
             className="post-title"
-            onClick={() => setSelectedPost(post)}
+            onClick={() => {
+              deleteMutation.reset();
+              updateMutation.reset();
+              setSelectedPost(post);
+            }}
           >
             {post.title}
           </li>
@@ -76,7 +85,11 @@ export function Posts() {
       </div>
       <hr />
       {selectedPost && (
-        <PostDetail post={selectedPost} deleteMutation={deleteMutation} />
+        <PostDetail
+          post={selectedPost}
+          deleteMutation={deleteMutation}
+          updateMutation={updateMutation}
+        />
       )}
     </>
   );
