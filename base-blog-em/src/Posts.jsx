@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 import { fetchPosts, deletePost, updatePost } from "./api";
 import { PostDetail } from "./PostDetail";
@@ -23,6 +23,25 @@ export function Posts() {
     queryKey: ["posts", currentPage], // 쿼리키는 항상 배열로 받는다, v4 이상에서!
     queryFn: () => fetchPosts(currentPage), // 데이터를 받아오기 위해 실행할 함수
     staleTime: 5000, // staleTime의 기본값은 0
+  });
+
+  // 데이터 prefetch
+  // 현재 페이지가 변경될 때 마다 useQueryClient를 이용해 미리 다음 페이지의 데이터를 불러온다
+  const quertClient = useQueryClient();
+  useEffect(() => {
+    const nextPage = currentPage + 1;
+    if (nextPage > MAX_POST_PAGE) return;
+
+    quertClient.prefetchQuery({
+      queryKey: ["posts", nextPage],
+      queryFn: () => fetchPosts(nextPage),
+      staleTime: 5000,
+    });
+  }, [currentPage, quertClient]);
+
+  // Mutation
+  const deleteMutation = useMutation({
+    mutationFn: (postId) => deletePost(postId),
   });
 
   if (isLoading) {
@@ -56,7 +75,9 @@ export function Posts() {
         </button>
       </div>
       <hr />
-      {selectedPost && <PostDetail post={selectedPost} />}
+      {selectedPost && (
+        <PostDetail post={selectedPost} deleteMutation={deleteMutation} />
+      )}
     </>
   );
 }
