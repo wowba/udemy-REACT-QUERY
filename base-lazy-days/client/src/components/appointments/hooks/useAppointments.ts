@@ -19,6 +19,11 @@ async function getAppointments(
   return data;
 }
 
+const commonQueryOption = {
+  staleTime: 0,
+  gcTime: 30000,
+};
+
 // The purpose of this hook:
 //   1. track the current month/year (aka monthYear) selected by the user
 //     1a. provide a way to update state
@@ -78,6 +83,8 @@ export function useAppointments() {
     queryKey: [queryKeys.appointments, monthYear.year, monthYear.month],
     queryFn: () => getAppointments(monthYear.year, monthYear.month),
     select: (data) => selectFn(data, showAll),
+    refetchOnWindowFocus: true,
+    ...commonQueryOption,
   });
 
   /** ****************** END 3: useQuery  ******************************* */
@@ -95,6 +102,7 @@ export function useAppointments() {
           nextMonthYear.month,
         ],
         queryFn: () => getAppointments(nextMonthYear.year, nextMonthYear.month),
+        ...commonQueryOption,
       });
     },
     [monthYear, queryClient]
