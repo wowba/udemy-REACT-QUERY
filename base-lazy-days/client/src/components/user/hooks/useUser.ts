@@ -5,8 +5,8 @@ import type { User } from "@shared/types";
 
 import { useLoginData } from "@/auth/AuthContext";
 import { axiosInstance, getJWTHeader } from "@/axiosInstance";
-import { generateUserKey } from "@/react-query/key-factories";
 import { queryKeys } from "@/react-query/constants";
+import { generateUserKey } from "@/react-query/key-factories";
 
 // query function
 async function getUser(userId: number, userToken: string) {
