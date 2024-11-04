@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import jsonpatch from "fast-json-patch";
 
 import type { User } from "@shared/types";
@@ -7,6 +7,9 @@ import { axiosInstance, getJWTHeader } from "../../../axiosInstance";
 import { useUser } from "./useUser";
 
 import { toast } from "@/components/app/toast";
+import { queryKeys } from "@/react-query/constants";
+
+export const MUTATION_KEY = "patch-user";
 
 // for when we need a server function
 async function patchUserOnServer(
@@ -29,13 +32,19 @@ async function patchUserOnServer(
 }
 
 export function usePatchUser() {
-  const { user, updateUser } = useUser();
+  const { user } = useUser();
+  const queryClient = useQueryClient();
 
   const { mutate: patchUser } = useMutation({
+    mutationKey: [MUTATION_KEY],
     mutationFn: (newData: User) => patchUserOnServer(newData, user),
-    onSuccess: (userData: User | null) => {
+    onSuccess: () => {
       toast({ title: "user updated!", status: "success" });
-      updateUser(userData);
+    },
+    // onSuccess, onError 두 경우에 실행되는 onSettled
+    // onSettled는 Promise를 반환한다.
+    onSettled: () => {
+      return queryClient.invalidateQueries({ queryKey: [queryKeys.user] });
     },
   });
 
